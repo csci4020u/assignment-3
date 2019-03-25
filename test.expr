@@ -1,10 +1,2 @@
-let i = 0
-let j = 0
-while (i < 100) {
-  let i = i + 1
-  while (j < 100) {
-    let j = j + 1
-    print "solution:" i j
-  }
-}
-
+1 + 2
+1 + 2 * 3

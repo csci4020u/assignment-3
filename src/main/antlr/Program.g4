@@ -4,8 +4,25 @@ grammar Program;
   import java.util.*;
 }
 
-program returns [Expr code]
-  : /* TO BE COMPLETED */
+@members {
+    public int plusCounter = 0;
+    public int multCounter = 0;
+}
+
+program
+  : (expr NL)+ EOF
+  ;
+
+expr
+  : expr '+' expr
+  | expr '*' expr
+  | number
+  | '(' expr ')'
+  ;
+
+number
+  : FLOAT
+  | INT
   ;
 
 WHITESPACE : (' ' | '\t' )+ -> skip;

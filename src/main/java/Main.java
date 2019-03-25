@@ -38,14 +38,16 @@ public class Main {
         return parser.program();
     }
 
+    /*
     public static void run(String filename) throws Exception {
         parse(filename).code.eval(new HashMap<String, Double>());
     }
+    */
 
     public static void main(String[] args) {
         try {
             for(String name : args) {
-                run(name);
+                parse(name);
             }
         } catch(Exception e) {
             out.println("Error:" + e.getMessage());
