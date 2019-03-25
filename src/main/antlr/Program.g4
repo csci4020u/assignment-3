@@ -4,25 +4,26 @@ grammar Program;
   import java.util.*;
 }
 
-@members {
-    public int plusCounter = 0;
-    public int multCounter = 0;
-}
-
 program
-  : (expr NL)+ EOF
+  : (
+    expr 
+    NL {Action.print($expr.v);}
+    )+ EOF
   ;
 
 expr
-  : expr '+' expr
-  | expr '*' expr
-  | number
-  | '(' expr ')'
+  returns [double v]
+  @init { $v = 0.0; }
+  : e1=expr '*' e2=expr { $v = $e1.v * $e2.v; }
+  | e1=expr '+' e2=expr { $v = $e1.v + $e2.v; }
+  | number              { $v = $number.v; } 
+  | '(' expr ')'        { $v = $expr.v; }
   ;
 
-number
-  : FLOAT
-  | INT
+number 
+  returns [double v]
+  : FLOAT { $v = Double.parseDouble($FLOAT.text); }
+  | INT   { $v = Double.parseDouble($INT.text); }
   ;
 
 WHITESPACE : (' ' | '\t' )+ -> skip;
