@@ -6,24 +6,38 @@ grammar Program;
 
 program 
   returns [Code code]
+  : block EOF {$code = $block.code;}
+  ;
+
+block
+  returns [Code code]
   @init {
-    $code = Program.emptyProgram();
+    $code = Program.empty();
   }
   : (
-    stmt        { $code = Program.add($code, $stmt.code); }
+    stmt        { Program.add($code, $stmt.code); }
     NL
-    )+ EOF
+    )+
   ;
+
 
 stmt
   returns [Code code]
-  : expr        { $code = $expr.code; }
-  | print       { $code = $expr.code; }
+  : expr        { $code = Print.expr($expr.code); }
+  | print       { $code = $print.code; }
+  | assignment  { $code = $assignment.code; }
+  | branch      { $code = $branch.code; }
   ;
 
 print
   returns [Code code]
-  : 'print' (output)+
+  @init {
+    $code = Print.empty();
+  }
+  : 'print' 
+    (
+    output      { Print.add($code, $output.code); }
+    )+
   ;
 
 output
@@ -33,6 +47,32 @@ output
     (':' INT    { $code = Output.expr($expr.code, $INT.text); }
     )?
   ;
+
+assignment
+  returns [Code code]
+  : 'let' ID '=' expr { $code = Assignment.make($ID.text, $expr.code); }
+  ;
+
+branch
+  returns [Code code]
+  : 'if' cond '{' NL
+    block
+    '}'
+    (
+    'else' '{' NL
+    block
+    '}'
+    )
+  ;
+
+cond
+  returns [Code code]
+  : expr '<' expr
+  | expr '==' expr
+  | expr '>' expr
+  | '(' cond ')'
+  ;
+
 
 expr
   returns [Code code]
@@ -44,12 +84,13 @@ expr
   | '-' expr                  { $code = Expr.neg($expr.code); }
   | '(' expr ')'              { $code = $expr.code; }
   | number                    { $code = $number.code; }
+  | ID                        { $code = Expr.variable($ID.text); }
   ;
 
 number
   returns [Code code]
-  : FLOAT
-  | INT
+  : FLOAT       { $code = Literal.num($FLOAT.text); }
+  | INT         { $code = Literal.num($INT.text); }
   ;
 
 WHITESPACE : (' ' | '\t' )+ -> skip;
